@@ -55,16 +55,13 @@ namespace VacuumCleanerRobot
         public void Clean(Robot robot, Map map)
         {
             // Utilizing a Random Path Strategy... 
-            bool[,] visited = new bool[map.Width, map.Height];
-            int visitedNum = 0;
+            Random rand = new();
             int[][] directions = [
                 [1, 0],
                 [ 0, 1 ],
                 [ -1, 0 ],
                 [ 0, -1 ]
             ];
-
-            Random rand = new();
 
             while (robot.Battery > 0)
             {
@@ -75,13 +72,7 @@ namespace VacuumCleanerRobot
 
                 if (!robot.Move(x, y)) continue;
 
-                if (!visited[x, y])
-                {
-                    visited[x, y] = true;
-                    visitedNum += 1;
-                    robot.CleanCurrentSpot();
-                }
-
+                robot.CleanCurrentSpot();
                 Thread.Sleep(150);
             }
 
