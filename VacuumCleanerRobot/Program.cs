@@ -22,6 +22,40 @@ public class Program
                 }
             }
         }
+
+        public bool IsInBounds(int x, int y)
+        {
+            return x >= 0 && x < this.Width && y >= 0 && y < this.Height; 
+        }
+
+        public bool IsDirt(int x, int y)
+        {
+            return this.IsInBounds(x, y) && this._grid[x, y] == CellType.Dirt;
+        }
+
+        public bool IsObstacle(int x, int y)
+        {
+            return this.IsInBounds(x, y) && this._grid[x, y] == CellType.Obstacle;
+        }
+
+         public void AddDirt(int x, int y)
+        {
+            this._grid[x, y] = CellType.Dirt;
+        }
+
+         public void AddObstacle(int x, int y)
+        {
+            this._grid[x, y] = CellType.Obstacle;
+        }
+
+        public void Clean(int x, int y)
+        {
+            if (IsDirt(x, y))
+            {
+                this._grid[x, y] = CellType.Cleaned;
+            }
+        }
+
         public void Display(int robotX, int robotY)
         {
             Console.Clear();
@@ -48,18 +82,19 @@ public class Program
                         }
                     }
                 }
-                Console.WriteLine(); 
+                Console.WriteLine();
             }
         }
     }
 
     public static void Main(string[] args)
     {
-        Console.WriteLine("--------------- Vacuum Cleaner Robot Program ------------------");
-        Map myMap = new Map(5, 5);
+        Map myMap = new(5, 5);
 
         // Console.WriteLine($"Grid width: {myMap.Width}");
         // Console.WriteLine($"Grid height: {myMap.Height}");
+        myMap.AddDirt(0, 1);
+        myMap.AddObstacle(3, 0);
         myMap.Display(1, 2);
     }
 }
