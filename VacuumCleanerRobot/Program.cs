@@ -22,14 +22,44 @@ public class Program
                 }
             }
         }
+        public void Display(int robotX, int robotY)
+        {
+            Console.Clear();
+            Console.WriteLine("Vacuum cleaner robot simulation");
+            Console.WriteLine("-------------------------------");
+            Console.WriteLine("Legends: #=Obstacles, D=Dirt, .=Empty, R=Robot, C=Cleaned");
+
+            for (int x = 0; x < this.Width; x++)
+            {
+                for (int y = 0; y < this.Height; y++)
+                {
+                    if (x == robotX && y == robotY)
+                    {
+                        Console.Write("R ");
+                    }
+                    else
+                    {
+                        switch (this._grid[x, y])
+                        {
+                            case CellType.Empty: Console.Write(". "); break;
+                            case CellType.Dirt: Console.Write("D "); break;
+                            case CellType.Obstacle: Console.Write("# "); break;
+                            case CellType.Cleaned: Console.Write("C "); break;
+                        }
+                    }
+                }
+                Console.WriteLine(); 
+            }
+        }
     }
 
     public static void Main(string[] args)
     {
         Console.WriteLine("--------------- Vacuum Cleaner Robot Program ------------------");
-        Map myMap = new Map(12, 15);
+        Map myMap = new Map(5, 5);
 
-        Console.WriteLine($"Grid width: {myMap.Width}");
-        Console.WriteLine($"Grid height: {myMap.Height}");
+        // Console.WriteLine($"Grid width: {myMap.Width}");
+        // Console.WriteLine($"Grid height: {myMap.Height}");
+        myMap.Display(1, 2);
     }
 }
