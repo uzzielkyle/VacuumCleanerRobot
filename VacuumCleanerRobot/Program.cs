@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class Program
+namespace VacuumCleanerRobot
 {
     public class Map
     {
@@ -25,7 +25,7 @@ public class Program
 
         public bool IsInBounds(int x, int y)
         {
-            return x >= 0 && x < this.Width && y >= 0 && y < this.Height; 
+            return x >= 0 && x < this.Width && y >= 0 && y < this.Height;
         }
 
         public bool IsDirt(int x, int y)
@@ -38,12 +38,12 @@ public class Program
             return this.IsInBounds(x, y) && this._grid[x, y] == CellType.Obstacle;
         }
 
-         public void AddDirt(int x, int y)
+        public void AddDirt(int x, int y)
         {
             this._grid[x, y] = CellType.Dirt;
         }
 
-         public void AddObstacle(int x, int y)
+        public void AddObstacle(int x, int y)
         {
             this._grid[x, y] = CellType.Obstacle;
         }
@@ -87,14 +87,17 @@ public class Program
         }
     }
 
-    public static void Main(string[] args)
+    public class Program
     {
-        Map myMap = new(5, 5);
+        public static void Main(string[] args)
+        {
+            Map myMap = new(5, 5);
 
-        // Console.WriteLine($"Grid width: {myMap.Width}");
-        // Console.WriteLine($"Grid height: {myMap.Height}");
-        myMap.AddDirt(0, 1);
-        myMap.AddObstacle(3, 0);
-        myMap.Display(1, 2);
+            // Console.WriteLine($"Grid width: {myMap.Width}");
+            // Console.WriteLine($"Grid height: {myMap.Height}");
+            myMap.AddDirt(0, 1);
+            myMap.AddObstacle(3, 0);
+            myMap.Display(1, 2);
+        }
     }
 }
