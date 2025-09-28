@@ -2,6 +2,93 @@
 
 namespace VacuumCleanerRobot
 {
+    public interface ICleaningStrategy
+    {
+        void Clean(Robot robot, Map map);
+    }
+
+    public class SPatternStrategy : ICleaningStrategy
+    {
+        public void Clean(Robot robot, Map map)
+        {
+            // Utilizing an S-Pattern Strategy...
+            int direction = 1;
+
+            for (int x = 0; x < map.Width; x++)
+            {
+                if (robot.Battery <= 0) break;
+
+                int startY = (direction == 1) ? 0 : map.Height - 1;
+                int endY = (direction == 1) ? map.Height : -1;
+
+                for (int y = startY; y != endY; y += direction)
+                {
+                    if (robot.Battery <= 0) break;
+
+                    if (!map.IsInBounds(x, y))
+                        break;
+
+                    if (!robot.Move(x, y))
+                    {
+                        // obstacle detected, change direction
+                        direction *= -1;
+                        y += direction;
+                        continue;
+                    }
+
+                    robot.CleanCurrentSpot();
+                    Thread.Sleep(150);
+                }
+                direction *= -1; // reverse direction for the next column
+            }
+
+            // Outcome message
+            if (robot.Battery <= 0)
+                Console.WriteLine("Cleaning stopped: Battery depleted.");
+            else
+                Console.WriteLine("Cleaning completed: S-Pattern Strategy finished.");
+        }
+    }
+
+    public class RandomPathStrategy : ICleaningStrategy
+    {
+        public void Clean(Robot robot, Map map)
+        {
+            // Utilizing a Random Path Strategy... 
+            bool[,] visited = new bool[map.Width, map.Height];
+            int visitedNum = 0;
+            int[][] directions = [
+                [1, 0],
+                [ 0, 1 ],
+                [ -1, 0 ],
+                [ 0, -1 ]
+            ];
+
+            Random rand = new();
+
+            while (robot.Battery > 0)
+            {
+                int[] direction = directions[rand.Next(directions.Length)];
+
+                int x = robot.X + direction[0];
+                int y = robot.Y + direction[1];
+
+                if (!robot.Move(x, y)) continue;
+
+                if (!visited[x, y])
+                {
+                    visited[x, y] = true;
+                    visitedNum += 1;
+                    robot.CleanCurrentSpot();
+                }
+
+                Thread.Sleep(150);
+            }
+
+            // Outcome message
+            if (robot.Battery <= 0) Console.WriteLine("Cleaning stopped: Battery depleted.");
+        }
+    }
     public class Map
     {
         private enum CellType { Empty, Dirt, Obstacle, Cleaned };
@@ -87,13 +174,20 @@ namespace VacuumCleanerRobot
         }
     }
 
-    public class Robot(Map map)
+    public class Robot(Map map, int batteryCapacity = 200)
     {
+
         private readonly Map _map = map;
         public int X { get; set; } = 0;
         public int Y { get; set; } = 0;
 
         public int SpeedSettings { get; private set; } = 150;
+
+        public int Battery { get; private set; } = batteryCapacity;
+
+        public int MaxBattery { get; } = batteryCapacity;
+
+        private ICleaningStrategy _strategy = new SPatternStrategy();
 
         public void AdjustSpeedSettings(int newSpeedSettings)
         {
@@ -108,9 +202,24 @@ namespace VacuumCleanerRobot
             this.SpeedSettings = newSpeedSettings;
         }
 
+        public void Recharge()
+        {
+            this.Battery = this.MaxBattery;
+        }
+
+        public void SetStrategy(ICleaningStrategy newStrategy)
+        {
+            this._strategy = newStrategy;
+        }
         public bool Move(int newX, int newY)
         {
-            if (this._map.IsObstacle(newX, newY) || !this._map.IsInBounds(newX, newY))
+            if (this.Battery <= 0)
+                return false;
+
+            if (!this._map.IsInBounds(newX, newY))
+                return false;
+
+            if (this._map.IsObstacle(newX, newY))
                 return false;
 
             // set new location
@@ -119,6 +228,7 @@ namespace VacuumCleanerRobot
 
             // display the map with the robot's new location
             this._map.Display(this.X, this.Y);
+            this.Battery--;
             return true;
         }
 
@@ -132,27 +242,7 @@ namespace VacuumCleanerRobot
 
         public void StartCleaning()
         {
-            Console.WriteLine("Start cleaning the room");
-            // flag that determines the direction
-            int direction = 1;
-            for (int x = 0; x < this._map.Width; x++)
-            {
-                int startY = (direction == 1) ? 0 : this._map.Height - 1;
-                int endY = (direction == 1) ? this._map.Height : -1;
-
-                for (int y = startY; y != endY; y += direction)
-                {
-                    if (!Move(x, y))
-                    {
-                        // obstacle detected
-                    }
-                    CleanCurrentSpot();
-                    Thread.Sleep(150);
-                }
-                direction *= -1; // reverse direction for the next column
-            }
-
-            Console.WriteLine("Done cleaning the room.");
+            this._strategy.Clean(this, this._map);
         }
     }
 
@@ -163,10 +253,17 @@ namespace VacuumCleanerRobot
             Map myMap = new(9, 9);
             myMap.AddDirt(2, 3);
             myMap.AddDirt(6, 2);
-            myMap.AddObstacle(5, 0);
+            myMap.AddDirt(3, 1);
+            myMap.AddObstacle(3, 2);
 
             Robot myRobot = new(myMap);
             myRobot.AdjustSpeedSettings(200);
+
+            SPatternStrategy sPatternStrategy = new();
+
+            RandomPathStrategy randomPathStrategy = new();
+            myRobot.SetStrategy(sPatternStrategy);
+
             myRobot.StartCleaning();
         }
     }
