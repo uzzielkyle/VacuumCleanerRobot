@@ -241,19 +241,27 @@ namespace VacuumCleanerRobot
     {
         public static void Main(string[] args)
         {
-            Map myMap = new(9, 9);
-            myMap.AddDirt(2, 3);
+            // Room Map
+            Map myMap = new(10, 10);
+
+            // Dirts
+            myMap.AddDirt(2,3);
             myMap.AddDirt(6, 2);
             myMap.AddDirt(3, 1);
+            myMap.AddDirt(7, 9);
+
+            // Obstacles
+            myMap.AddObstacle(3, 2);
             myMap.AddObstacle(3, 2);
 
+            // Cleaning Robot
             Robot myRobot = new(myMap);
-            myRobot.AdjustSpeedSettings(200);
+            myRobot.AdjustSpeedSettings(250);
 
+            // Cleaning Strategies
             SPatternStrategy sPatternStrategy = new();
-
             RandomPathStrategy randomPathStrategy = new();
-            myRobot.SetStrategy(sPatternStrategy);
+            myRobot.SetStrategy(randomPathStrategy);
 
             myRobot.StartCleaning();
         }
